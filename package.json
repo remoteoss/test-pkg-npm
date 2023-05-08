@@ -1,0 +1,19 @@
+{
+  "name": "@remoteoss/test-pkg-npm",
+  "version": "0.0.1-beta.1",
+  "description": "Just testing Github actions. Do not use this",
+  "main": "index.js",
+  "scripts": {
+    "release:local": "npm pack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remoteoss/test-pkg-npm.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/remoteoss/test-pkg-npm/issues"
+  },
+  "homepage": "https://github.com/remoteoss/test-pkg-npm#readme"
+}
