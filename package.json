@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/remoteoss/test-pkg-npm/issues"
   },
-  "homepage": "https://github.com/remoteoss/test-pkg-npm#readme"
+  "homepage": "https://github.com/remoteoss/test-pkg-npm#readme",
+  "devDependencies": {
+    "generate-changelog": "^1.8.0"
+  }
 }
