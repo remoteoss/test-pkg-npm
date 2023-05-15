@@ -1,10 +1,11 @@
 {
   "name": "@remoteoss/test-pkg-npm",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1-dev.20230515174322",
   "description": "Just testing Github actions. Do not use this",
   "main": "index.js",
   "scripts": {
-    "release:local": "npm pack"
+    "release:local": "npm pack",
+    "release:dev": "node scripts/release_dev"
   },
   "repository": {
     "type": "git",
