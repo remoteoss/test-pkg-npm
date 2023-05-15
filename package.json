@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "release:local": "npm pack",
-    "release:dev": "node scripts/release_dev"
+    "release:dev": "node scripts/release_dev",
+    "release:publish": "npm publish",
+    "check:unstaged": "git diff-index --quiet HEAD --",
+    "release:changelog": "if npm run check:unstaged; then generate-changelog && echo 'Changelog updated! Please review it and do any needed adjustments. Then commit it.'; else echo 'Unstaged files found. Please remove them and try again'; fi"
   },
   "repository": {
     "type": "git",
@@ -17,6 +20,11 @@
     "url": "https://github.com/remoteoss/test-pkg-npm/issues"
   },
   "homepage": "https://github.com/remoteoss/test-pkg-npm#readme",
+  "files": [
+    "index",
+    "CHANGELOG.md",
+    ".gitigore.md"
+  ],
   "devDependencies": {
     "generate-changelog": "^1.8.0"
   }

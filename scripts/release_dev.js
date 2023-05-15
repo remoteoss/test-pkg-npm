@@ -88,7 +88,7 @@ function init() {
 }
 
 function commit({ newVersion }) {
-  const cmd = `git add package.json package-lock.json && git commit -m "Publish ${newVersion}"`;
+  const cmd = `git add package.json package-lock.json && git commit -m "Publish ${newVersion}" && echo "All ready for dev publish. Run "npm run release:publish"`;
   exec(cmd, (error, stdout, stderr) => {
     console.log(`Exec: ${cmd}`);
     if (error) {
