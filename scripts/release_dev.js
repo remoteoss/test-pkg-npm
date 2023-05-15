@@ -6,6 +6,9 @@ const { exec } = require("child_process");
 const packageJsonPath = path.resolve(__dirname, "../package.json");
 const packageJson = require(packageJsonPath);
 
+const versionType = process.argv.slice(2)[0];
+const isVersionType = (type) => versionType === type;
+
 function getDateYyyyMMDDHHMMSS() {
   function pad2(n) {
     // always returns a string
@@ -24,12 +27,12 @@ function getDateYyyyMMDDHHMMSS() {
 
 const currentDate = getDateYyyyMMDDHHMMSS();
 
-function askForConfirmation({ onYes, onNo }) {
+function askForConfirmation({ question, onYes, onNo }) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
-  rl.question("Do you want to proceed with publishing it? (Y/n) ", (answer) => {
+  rl.question(`${question} (Y/n)`, (answer) => {
     const normalizedAnswer = answer.trim().toLowerCase();
 
     if (normalizedAnswer === "y" || normalizedAnswer === "yes") {
@@ -48,24 +51,32 @@ function askForConfirmation({ onYes, onNo }) {
   });
 }
 
-function init() {
-  console.log(":: Current version:", packageJson.version);
-
-  let newVersion;
-  // An existing dev version already exists
-  if (packageJson.version.includes("-dev.")) {
-    console.log("Bumping the dev version...");
-    newVersion = packageJson.version.replace(
-      /-dev.\d{14}$/,
-      `-dev.${currentDate}`
+function checkVersionType() {
+  if (!["minor", "patch"].includes(versionType)) {
+    console.log(
+      `🚨 Increment type argument "${versionType}" is invalid or missing. Make sure to run the script through package.json.`
     );
-  } else {
-    console.log("Creating a new dev version...");
-    const [major, minor, patch] = packageJson.version.split(".");
-    const newPatch = Number(patch) + 1;
-    newVersion = `${major}.${minor}.${newPatch}-dev.${currentDate}`;
+    process.exit();
+  }
+}
+
+function getNewVersion() {
+  if (packageJson.version.includes("-dev.")) {
+    console.log("Bumping exisiting dev...");
+    return packageJson.version.replace(/-dev.\d{14}$/, `-dev.${currentDate}`);
   }
 
+  console.log("Creating a new dev...");
+  const [_, major, minor, patch, prefix] = packageJson.version.match(
+    /^(\d+)\.(\d+)\.(\d+)(?:-(.+))?/
+  );
+  // @TODO-later support major.
+  const newMinor = isVersionType("minor") ? Number(minor) + 1 : minor;
+  const newPatch = isVersionType("patch") ? Number(patch) + 1 : 0;
+  return `${major}.${newMinor}.${newPatch}-dev.${currentDate}`;
+}
+
+function bumpAndCommit({ newVersion }) {
   // Creating the new version
   const cmd = `npm version --no-git-tag-version ${newVersion}`;
   exec(cmd, (error, stdout, stderr) => {
@@ -78,19 +89,15 @@ function init() {
       console.error(`stderr: ${stderr}`);
       return;
     }
-    console.log("New version:", stdout);
-
-    askForConfirmation({
-      onYes: () => commit({ newVersion }),
-      onNo: () => console.log("Okay, aborted."),
-    });
+    console.log(stdout);
+    commit({ newVersion });
   });
 }
 
 function commit({ newVersion }) {
-  const cmd = `git add package.json package-lock.json && git commit -m "Publish ${newVersion}" && echo "All ready for dev publish. Run "npm run release:publish"`;
+  console.log("Comitting new version...");
+  const cmd = `git add package.json package-lock.json && git commit -m "Publish ${newVersion}" && echo "✅ All ready for dev publish. Run 'npm run release:publish'"`;
   exec(cmd, (error, stdout, stderr) => {
-    console.log(`Exec: ${cmd}`);
     if (error) {
       console.error(`Error: ${error.message}`);
       return;
@@ -99,6 +106,23 @@ function commit({ newVersion }) {
       console.error(`stderr: ${stderr}`);
       return;
     }
+
+    console.log(stdout);
+  });
+}
+
+function init() {
+  checkVersionType();
+
+  const newVersion = getNewVersion();
+
+  console.log(":: Current version:", packageJson.version);
+  console.log(":::::: New version:", newVersion);
+
+  askForConfirmation({
+    question: "Ready to commit and publish it?",
+    onYes: () => bumpAndCommit({ newVersion }),
+    onNo: () => console.log("Okay, aborted."),
   });
 }
 
