@@ -17,11 +17,12 @@ function getDateYyyyMMDDHHMMSS() {
     // always returns a string
     return (n < 10 ? "0" : "") + n;
   }
-  const date = new Date();
+  const date = new Date(); // MAKE IT UTC!
   return (
     date.getFullYear() +
     pad2(date.getMonth() + 1) +
     pad2(date.getDate()) +
+    "-" +
     pad2(date.getHours()) +
     pad2(date.getMinutes()) +
     pad2(date.getSeconds())
@@ -33,7 +34,7 @@ const currentDate = getDateYyyyMMDDHHMMSS();
 function getNewVersion() {
   if (packageJson.version.includes("-dev.")) {
     console.log("Bumping exisiting dev...");
-    return packageJson.version.replace(/-dev.\d{14}$/, `-dev.${currentDate}`);
+    return packageJson.version.replace(/-dev.\d{15}$/, `-dev.${currentDate}`);
   }
 
   console.log("Creating a new dev...");
@@ -53,7 +54,7 @@ async function bumpVersion({ newVersion }) {
 
 async function commit({ newVersion }) {
   console.log("Comitting new version...");
-  const cmd = `git add package.json package-lock.json && git commit -m "Prerelease ${newVersion}"`; // && git push
+  const cmd = `git add package.json package-lock.json && git commit -m "Prerelease ${newVersion}" && git push`; // && git push
   await runExec(cmd);
 }
 
