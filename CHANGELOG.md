@@ -1,3 +1,7 @@
+#### 0.1.1-beta.0 (2023-05-16)
+
+- Publish with tag=stable
+
 #### 0.1.0-beta.0 (2023-05-16)
 
 ##### Chores
