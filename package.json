@@ -1,13 +1,14 @@
 {
   "name": "@remoteoss/test-pkg-npm",
-  "version": "0.0.2-dev.20230516085057",
+  "version": "0.0.2-dev.20230516101627",
   "description": "Just testing Github actions. Do not use this",
   "main": "index.js",
   "scripts": {
-    "check:unstaged": "git diff-index --quiet HEAD --",
-    "release:dev:minor": "node scripts/release_dev minor",
+    "check:pr-version": "node scripts/pr_dev_version",
     "release:dev:patch": "node scripts/release_dev patch",
-    "release:main": "node scripts/release_main",
+    "release:dev:minor": "node scripts/release_dev minor",
+    "release:main:patch": "node scripts/release_main patch",
+    "release:main:minor": "node scripts/release_main minor",
     "psrepublishOnly": "if [[ ! $PWD =~ scripts$ ]]; then npm run publish:nopublish; fi",
     "psublish:nopublish": "echo 'Use `npm release:*` script instead && exit 1"
   },
@@ -28,6 +29,7 @@
   ],
   "devDependencies": {
     "child-process-promise": "^2.2.1",
-    "generate-changelog": "^1.8.0"
+    "generate-changelog": "^1.8.0",
+    "semver": "^7.5.1"
   }
 }
