@@ -1,22 +1,31 @@
 const path = require("path");
+
 const semver = require("semver");
+
 const {
   askForConfirmation,
   askForText,
+  checkGitStatus,
+  checkNpmAuth,
   runExec,
+  revertChanges,
+  revertCommit,
 } = require("./release.helpers");
 
 const packageJsonPath = path.resolve(__dirname, "../package.json");
 const packageJson = require(packageJsonPath);
 
-async function checkGitStatus() {
-  const output = await runExec("git status --porcelain").toString().trim();
-  if (!!output) {
+async function checkGitBranchAndStatus() {
+  const result = await runExec("git branch --show-current");
+  const branchName = result.stdout.toString().trim();
+  if (branchName !== "main") {
     console.error(
-      "🟠 There are unstaged git files. Please commit or revert them and try again."
+      `🟠 You are at "${branchName}" instead of "main" branch. Are you sure you wanna release a stable version here?`
     );
-    process.exit();
+    process.exit(1);
   }
+
+  await checkGitStatus();
 }
 
 function getNewVersion() {
@@ -43,12 +52,15 @@ async function commit({ newVersion }) {
   console.log("Comitting new version...");
   const cmd = `git add package.json package-lock.json CHANGELOG.md && git commit -m "Release ${newVersion}" && git tag v${newVersion} && git push origin --tags`;
   await runExec(cmd);
+
+  // console.info(`Creating github release...`);
+  // // @TODO - Needs gh installed globally. Let's do it manually for now.
+  // await runExec(`gh release create v${newVersion}`);
 }
 
-async function publish({ newVersion }) {
+async function publish({ newVersion, otp }) {
   console.log("Publishing new version...");
 
-  const otp = await askForText("🔐 What is the NPM Auth OTP? (Check 1PW) ");
   /*
     --access=public
       By default, NPM treats packages with workspace (@remoteoss) as private. This forces it to be public
@@ -56,17 +68,23 @@ async function publish({ newVersion }) {
       VERY IMPORTANT: This tag tells NPM that although beta this is our "latest" version,
       This way when devs install the package, it will consider this beta the stable one.
   */
-  const cmd = `npm publish --access=public --tag=latest --otp=${otp}`;
+  const cmd = `echo "npm publish mocked"`;
+  // const cmd = `npm publish --access=public --tag=latest --otp=${otp}`;
   try {
     await runExec(cmd);
     console.log(`🎉 Version ${newVersion} published!"`);
   } catch {
-    console.log("You may want to revert the commit using 'git reset HEAD~1'.");
+    await revertCommit({ newVersion, main: true });
   }
 }
 
+// TODO later - Ideally this should be a GH Action triggered after a PR merge:
+// - GH Action triggers, which opens a new PR with the new version + CHANGELOG.
+// - A maintainer review the MR and approve it.
+//    - Or tweak it if needed, or even close it, in case it doesn't make sense to release a new version.
+// - On release-PR merge, another GH Action is triggered to do the NPM publish.
 async function init() {
-  // await checkGitStatus();
+  await checkGitBranchAndStatus();
 
   const newVersion = getNewVersion();
 
@@ -74,10 +92,11 @@ async function init() {
   console.log(":::::: New version:", newVersion);
 
   const answerVersion = await askForConfirmation("Is this version correct?");
-
   if (answerVersion === "no") {
-    process.exit();
+    process.exit(1);
   }
+
+  await checkNpmAuth();
 
   await bumpVersion({ newVersion });
   await updateChangelog({ newVersion });
@@ -87,12 +106,13 @@ async function init() {
   );
 
   if (answerChangelog === "no") {
-    console.log("You may want to revert the changed files!");
-    process.exit();
+    await revertChanges();
   }
 
+  const otp = await askForText("🔐 What is the NPM Auth OTP? (Check 1PW) ");
+
   await commit({ newVersion });
-  await publish({ newVersion });
+  await publish({ newVersion, otp });
 }
 
 init();
