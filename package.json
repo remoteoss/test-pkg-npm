@@ -7,7 +7,7 @@
     "check:unstaged": "git diff-index --quiet HEAD --",
     "release:dev:minor": "node scripts/release_dev minor",
     "release:dev:patch": "node scripts/release_dev patch",
-    "release:main": "node scripts/release_beta",
+    "release:main": "node scripts/release_main",
     "psrepublishOnly": "if [[ ! $PWD =~ scripts$ ]]; then npm run publish:nopublish; fi",
     "psublish:nopublish": "echo 'Use `npm release:*` script instead && exit 1"
   },
@@ -28,7 +28,6 @@
   ],
   "devDependencies": {
     "child-process-promise": "^2.2.1",
-    "generate-changelog": "^1.8.0",
-    "npm-cli-login": "^1.0.0"
+    "generate-changelog": "^1.8.0"
   }
 }
