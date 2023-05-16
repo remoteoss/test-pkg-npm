@@ -1,7 +1,10 @@
-const fs = require("fs");
 const path = require("path");
-const readline = require("readline");
-const { exec } = require("child_process");
+const {
+  askForConfirmation,
+  askForText,
+  runExec,
+  checkGitStatus,
+} = require("./release.helpers");
 
 const packageJsonPath = path.resolve(__dirname, "../package.json");
 const packageJson = require(packageJsonPath);
@@ -27,39 +30,6 @@ function getDateYyyyMMDDHHMMSS() {
 
 const currentDate = getDateYyyyMMDDHHMMSS();
 
-function askForConfirmation({ question, onYes, onNo }) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  rl.question(`${question} (Y/n)`, (answer) => {
-    const normalizedAnswer = answer.trim().toLowerCase();
-
-    if (normalizedAnswer === "y" || normalizedAnswer === "yes") {
-      console.log("Confirmed! Proceeding...");
-      onYes();
-    } else if (normalizedAnswer === "n" || normalizedAnswer === "no") {
-      console.log("Cancelled. Exiting...");
-      onNo();
-      // Handle cancellation or exit the script as needed
-    } else {
-      console.log("Invalid input. Please enter Y or n.");
-      askForConfirmation();
-    }
-
-    rl.close();
-  });
-}
-
-function checkVersionType() {
-  if (!["minor", "patch"].includes(versionType)) {
-    console.log(
-      `🚨 Increment type argument "${versionType}" is invalid or missing. Make sure to run the script through package.json.`
-    );
-    process.exit();
-  }
-}
-
 function getNewVersion() {
   if (packageJson.version.includes("-dev.")) {
     console.log("Bumping exisiting dev...");
@@ -76,54 +46,56 @@ function getNewVersion() {
   return `${major}.${newMinor}.${newPatch}-dev.${currentDate}`;
 }
 
-function bumpAndCommit({ newVersion }) {
-  // Creating the new version
+async function bumpVersion({ newVersion }) {
   const cmd = `npm version --no-git-tag-version ${newVersion}`;
-  exec(cmd, (error, stdout, stderr) => {
-    console.log(`Exec: ${cmd}`);
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-    console.log(stdout);
-    commit({ newVersion });
-  });
+  await runExec(cmd);
 }
 
-function commit({ newVersion }) {
+async function commit({ newVersion }) {
   console.log("Comitting new version...");
-  const cmd = `git add package.json package-lock.json && git commit -m "Publish ${newVersion}" && echo "✅ All ready for dev publish. Run 'npm run release:publish'"`;
-  exec(cmd, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-
-    console.log(stdout);
-  });
+  const cmd = `git add package.json package-lock.json && git commit -m "Prerelease ${newVersion}"`; // && git push
+  await runExec(cmd);
 }
 
-function init() {
-  checkVersionType();
+async function publish({ newVersion }) {
+  console.log("Publishing new version...");
+
+  const otp = await askForText("🔐 What is the NPM Auth OTP? (Check 1PW) ");
+  /*
+    --access=public
+      By default, NPM treats packages with workspace (@remoteoss) as private. This forces it to be public
+    --tag=dev 
+      VERY IMPORTANT: Having a tag tells NPM that this is not a "stable" version,
+      otherwise it will be automatically installed by anyone doing "npm install <package-name>".
+      This forces the devs to be precise in the version with "npm install <package-name>@x.x.x-dev.xxxxx"
+      Know more at: https://stackoverflow.com/a/48038690/4737729
+  */
+  const cmd = `npm publish --access=public --tag=dev --otp=${otp}`;
+  try {
+    await runExec(cmd);
+    console.log(`🎉 Version ${newVersion} published!"`);
+  } catch {
+    console.log("You may want to revert the commit using 'git reset HEAD~1'.");
+  }
+}
+
+async function init() {
+  // await checkGitStatus();
 
   const newVersion = getNewVersion();
 
   console.log(":: Current version:", packageJson.version);
   console.log(":::::: New version:", newVersion);
 
-  askForConfirmation({
-    question: "Ready to commit and publish it?",
-    onYes: () => bumpAndCommit({ newVersion }),
-    onNo: () => console.log("Okay, aborted."),
-  });
+  const answer = await askForConfirmation("Ready to commit and publish it?");
+
+  if (answer === "no") {
+    process.exit();
+  }
+
+  await bumpVersion({ newVersion });
+  await commit({ newVersion });
+  await publish({ newVersion });
 }
 
 init();
