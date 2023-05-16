@@ -1,15 +1,15 @@
 {
   "name": "@remoteoss/test-pkg-npm",
-  "version": "0.0.1",
+  "version": "0.0.2-dev.20230516084812",
   "description": "Just testing Github actions. Do not use this",
   "main": "index.js",
   "scripts": {
-    "release:local": "npm pack",
+    "check:unstaged": "git diff-index --quiet HEAD --",
     "release:dev:minor": "node scripts/release_dev minor",
     "release:dev:patch": "node scripts/release_dev patch",
-    "release:publish": "npm publish",
-    "check:unstaged": "git diff-index --quiet HEAD --",
-    "release:changelog": "if npm run check:unstaged; then generate-changelog && echo 'Changelog updated! Please review it and do any needed adjustments. Then commit it.'; else echo 'Unstaged files found. Please remove them and try again'; fi"
+    "release:main": "node scripts/release_beta",
+    "psrepublishOnly": "if [[ ! $PWD =~ scripts$ ]]; then npm run publish:nopublish; fi",
+    "psublish:nopublish": "echo 'Use `npm release:*` script instead && exit 1"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,8 @@
     ".gitigore.md"
   ],
   "devDependencies": {
-    "generate-changelog": "^1.8.0"
+    "child-process-promise": "^2.2.1",
+    "generate-changelog": "^1.8.0",
+    "npm-cli-login": "^1.0.0"
   }
 }
