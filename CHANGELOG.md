@@ -1,3 +1,9 @@
+#### 0.1.2-beta.0 (2023-05-16)
+
+##### Bug Fixes
+
+- Add missing person ([#3](https://github.com/remoteoss/test-pkg-npm/pull/3)) ([27a41a89](https://github.com/remoteoss/test-pkg-npm/commit/27a41a89d7853cdda1665692aa51ae59e8751a85))
+
 #### 0.1.1-beta.0 (2023-05-16)
 
 - Publish with tag=stable
