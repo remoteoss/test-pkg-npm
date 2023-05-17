@@ -43,7 +43,7 @@ async function bumpVersion({ newVersion }) {
 
 async function gitCommit({ newVersion }) {
   console.log("Comitting published version.");
-  const cmd = `git add package.json package-lock.json && git commit -m "Release ${newVersion}" && git tag v${newVersion} && git push origin --tags`;
+  const cmd = `git add package.json package-lock.json && git commit -m "Release ${newVersion}" && git tag v${newVersion} && git push && git push origin --tags`;
   await runExec(cmd);
 }
 

@@ -68,8 +68,7 @@ async function publish({ newVersion, otp }) {
       VERY IMPORTANT: This tag tells NPM that although beta this is our "latest" version,
       This way when devs install the package, it will consider this beta the stable one.
   */
-  const cmd = `echo "npm publish mocked"`;
-  // const cmd = `npm publish --access=public --tag=latest --otp=${otp}`;
+  const cmd = `npm publish --access=public --tag=latest --otp=${otp}`;
   try {
     await runExec(cmd);
     console.log(`🎉 Version ${newVersion} published!"`);
