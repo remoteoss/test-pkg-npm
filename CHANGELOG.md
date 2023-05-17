@@ -1,3 +1,19 @@
+#### 0.1.5-beta.0 (2023-05-17)
+
+##### Chores
+
+*  revert package version to 0.1.4-beta.0 ([b4b94afa](https://github.com/remoteoss/test-pkg-npm/commit/b4b94afab3a93fea3454b215e579df24ba8240bd))
+
+##### Continuous Integration
+
+*  Update release scripts ([964a96e5](https://github.com/remoteoss/test-pkg-npm/commit/964a96e5f885aedba36891f2fad41c3f47cb6ba3))
+*  main - push tags ([648c50f8](https://github.com/remoteoss/test-pkg-npm/commit/648c50f8abe13623124e258324aaf26dcb572aef))
+*   Add '-' to dev suffix ([fd8f5c5f](https://github.com/remoteoss/test-pkg-npm/commit/fd8f5c5fafc4090ea118bedc008d370b5c234328))
+
+##### Bug Fixes
+
+*  Add missing person to goodbye ([#5](https://github.com/remoteoss/test-pkg-npm/pull/5)) ([d494a582](https://github.com/remoteoss/test-pkg-npm/commit/d494a5820da541e491bff2b728eefaeaf29425af))
+
 #### 0.1.4-beta.0 (2023-05-17)
 
 ##### Continuous Integration
