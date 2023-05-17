@@ -50,7 +50,7 @@ async function updateChangelog({ newVersion }) {
 
 async function commit({ newVersion }) {
   console.log("Comitting new version...");
-  const cmd = `git add package.json package-lock.json CHANGELOG.md && git commit -m "Release ${newVersion}" && git tag v${newVersion} && git push origin --tags`;
+  const cmd = `git add package.json package-lock.json CHANGELOG.md && git commit -m "Release ${newVersion}" && git tag v${newVersion} && git push && git push origin --tags`;
   await runExec(cmd);
 
   // console.info(`Creating github release...`);
