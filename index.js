@@ -1,5 +1,5 @@
 console.log("Good morning world!");
 
-console.log("Hello person!");
+console.log("Hello potatoes!");
 
 console.log("Goodbye person!");
