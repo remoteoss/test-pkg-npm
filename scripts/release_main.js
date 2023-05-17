@@ -16,8 +16,11 @@ const packageJsonPath = path.resolve(__dirname, "../package.json");
 const packageJson = require(packageJsonPath);
 
 async function checkGitBranchAndStatus() {
-  const result = await runExec("git branch --show-current");
-  const branchName = result.stdout.toString().trim();
+  console.log("Checking your main branch...");
+  const resultBranch = await runExec("git branch --show-current", {
+    silent: true,
+  });
+  const branchName = resultBranch.stdout.toString().trim();
   if (branchName !== "main") {
     console.error(
       `🟠 You are at "${branchName}" instead of "main" branch. Are you sure you wanna release a stable version here?`
@@ -25,6 +28,17 @@ async function checkGitBranchAndStatus() {
     process.exit(1);
   }
 
+  // Check if local main is up to date.
+  await runExec("git remote update", { silent: true });
+  const resultStatus = await runExec("git status -uno", { silent: true });
+  const mainStatus = resultStatus.stdout.toString().trim();
+
+  if (!mainStatus.includes("Your branch is up to date with 'origin/main'.")) {
+    console.error(
+      `🟠 Please make sure your branch is up to date with the git repo.`
+    );
+    process.exit(1);
+  }
   await checkGitStatus();
 }
 

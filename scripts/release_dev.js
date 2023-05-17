@@ -37,6 +37,7 @@ async function getNewVersion() {
 }
 
 async function bumpVersion({ newVersion }) {
+  // The tag will be added on gitCommit()
   const cmd = `npm version --no-git-tag-version ${newVersion}`;
   await runExec(cmd);
 }

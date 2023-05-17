@@ -81,11 +81,12 @@ async function revertChanges() {
   process.exit(1);
 }
 
-async function runExec(cmd) {
-  console.log(`Exec: ${cmd}`);
+async function runExec(cmd, { silent } = {}) {
+  if (!silent) console.log(`Exec: ${cmd}`);
+
   try {
     const result = await exec(cmd);
-    console.log(result.stdout);
+    if (!silent) console.log(result.stdout);
     if (result.stderr) {
       console.error(`stderr: ${result.stderr}`);
     }
