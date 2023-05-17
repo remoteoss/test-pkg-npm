@@ -1,6 +1,6 @@
-const path = require("path");
+const path = require('path');
 
-const semver = require("semver");
+const semver = require('semver');
 
 const {
   askForConfirmation,
@@ -10,18 +10,18 @@ const {
   runExec,
   revertChanges,
   revertCommit,
-} = require("./release.helpers");
+} = require('./release.helpers');
 
-const packageJsonPath = path.resolve(__dirname, "../package.json");
+const packageJsonPath = path.resolve(__dirname, '../package.json');
 const packageJson = require(packageJsonPath);
 
 async function checkGitBranchAndStatus() {
-  console.log("Checking your main branch...");
-  const resultBranch = await runExec("git branch --show-current", {
+  console.log('Checking your main branch...');
+  const resultBranch = await runExec('git branch --show-current', {
     silent: true,
   });
   const branchName = resultBranch.stdout.toString().trim();
-  if (branchName !== "main") {
+  if (branchName !== 'main') {
     console.error(
       `🟠 You are at "${branchName}" instead of "main" branch. Are you sure you wanna release a stable version here?`
     );
@@ -29,14 +29,12 @@ async function checkGitBranchAndStatus() {
   }
 
   // Check if local main is up to date.
-  await runExec("git remote update", { silent: true });
-  const resultStatus = await runExec("git status -uno", { silent: true });
+  await runExec('git remote update', { silent: true });
+  const resultStatus = await runExec('git status -uno', { silent: true });
   const mainStatus = resultStatus.stdout.toString().trim();
 
   if (!mainStatus.includes("Your branch is up to date with 'origin/main'.")) {
-    console.error(
-      `🟠 Please make sure your branch is up to date with the git repo.`
-    );
+    console.error(`🟠 Please make sure your branch is up to date with the git repo.`);
     process.exit(1);
   }
   await checkGitStatus();
@@ -48,7 +46,7 @@ function getNewVersion() {
   // TODO later - get the right version based on commit history.
   const versionType = process.argv.slice(2)[0];
   const versionBase = semver.coerce(currentVersion);
-  return semver.inc(versionBase, versionType) + "-beta.0";
+  return semver.inc(versionBase, versionType) + '-beta.0';
 }
 
 async function bumpVersion({ newVersion }) {
@@ -56,14 +54,14 @@ async function bumpVersion({ newVersion }) {
   await runExec(cmd);
 }
 
-async function updateChangelog({ newVersion }) {
-  console.log("Updating changelog...");
+async function updateChangelog() {
+  console.log('Updating changelog...');
   const cmd = `npx generate-changelog`;
   await runExec(cmd);
 }
 
 async function commit({ newVersion }) {
-  console.log("Comitting new version...");
+  console.log('Comitting new version...');
   const cmd = `git add package.json package-lock.json CHANGELOG.md && git commit -m "Release ${newVersion}" && git tag v${newVersion} && git push && git push origin --tags`;
   await runExec(cmd);
 
@@ -73,7 +71,7 @@ async function commit({ newVersion }) {
 }
 
 async function publish({ newVersion, otp }) {
-  console.log("Publishing new version...");
+  console.log('Publishing new version...');
 
   /*
     --access=public
@@ -87,6 +85,7 @@ async function publish({ newVersion, otp }) {
     await runExec(cmd);
     console.log(`🎉 Version ${newVersion} published!"`);
   } catch {
+    console.log('🚨 Publish failed! Perhaps the OTP is wrong.');
     await revertCommit({ newVersion, main: true });
   }
 }
@@ -101,28 +100,28 @@ async function init() {
 
   const newVersion = getNewVersion();
 
-  console.log(":: Current version:", packageJson.version);
-  console.log(":::::: New version:", newVersion);
+  console.log(':: Current version:', packageJson.version);
+  console.log(':::::: New version:', newVersion);
 
-  const answerVersion = await askForConfirmation("Is this version correct?");
-  if (answerVersion === "no") {
+  const answerVersion = await askForConfirmation('Is this version correct?');
+  if (answerVersion === 'no') {
     process.exit(1);
   }
 
   await checkNpmAuth();
 
   await bumpVersion({ newVersion });
-  await updateChangelog({ newVersion });
+  await updateChangelog();
 
   const answerChangelog = await askForConfirmation(
-    "Changelog is updated. You may tweak it as needed. Once ready, press Y to continue."
+    'Changelog is updated. You may tweak it as needed. Once ready, press Y to continue.'
   );
 
-  if (answerChangelog === "no") {
+  if (answerChangelog === 'no') {
     await revertChanges();
   }
 
-  const otp = await askForText("🔐 What is the NPM Auth OTP? (Check 1PW) ");
+  const otp = await askForText('🔐 What is the NPM Auth OTP? (Check 1PW) ');
 
   await commit({ newVersion });
   await publish({ newVersion, otp });

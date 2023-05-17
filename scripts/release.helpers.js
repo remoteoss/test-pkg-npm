@@ -1,41 +1,25 @@
-const readline = require("node:readline/promises");
+const readline = require('node:readline/promises');
 
-const { exec } = require("child-process-promise");
+const { exec } = require('child-process-promise');
 
 async function checkGitStatus() {
-  console.log("Checking your PR branch...");
-  const resultBranch = await runExec("git branch --show-current", {
-    silent: true,
-  });
-  const branchName = resultBranch.stdout.toString().trim();
-  if (branchName === "main") {
-    console.error(
-      `🟠 You are at "main". Are you sure you wanna release a dev version here?`
-    );
-    process.exit(1);
-  }
-
-  const result = await runExec("git status --porcelain", {
+  const result = await runExec('git status --porcelain', {
     silent: true,
   });
   const changes = result.stdout.toString().trim();
-  if (!!changes) {
-    console.error(
-      "🟠 There are unstaged git files. Please commit or revert them and try again."
-    );
+  if (changes) {
+    console.error('🟠 There are unstaged git files. Please commit or revert them and try again.');
     process.exit(1);
   }
 }
 
 async function checkNpmAuth() {
-  console.log("Checking NPM Authentication...");
+  console.log('Checking NPM Authentication...');
   try {
-    const result = await runExec("npm whoami");
+    const result = await runExec('npm whoami');
     const username = result.stdout.toString().trim();
-    if (username !== "remoteoss") {
-      console.log(
-        '🟠 You need to be logged to NPM as "remoteoss". Run "npm adduser"'
-      );
+    if (username !== 'remoteoss') {
+      console.log('🟠 You need to be logged to NPM as "remoteoss". Run "npm adduser"');
       process.exit(1);
     }
   } catch (e) {
@@ -63,24 +47,24 @@ async function askForConfirmation(question) {
 
   rl.close();
 
-  if (normalizedAnswer === "y" || normalizedAnswer === "yes") {
-    console.log("Confirmed! Proceeding...");
-    return "yes";
+  if (normalizedAnswer === 'y' || normalizedAnswer === 'yes') {
+    console.log('Confirmed! Proceeding...');
+    return 'yes';
   }
-  if (normalizedAnswer === "n" || normalizedAnswer === "no") {
-    console.log("Cancelled. Exiting...");
-    return "no";
+  if (normalizedAnswer === 'n' || normalizedAnswer === 'no') {
+    console.log('Cancelled. Exiting...');
+    return 'no';
   }
-  console.log("Invalid input. Please enter Y or n.");
+  console.log('Invalid input. Please enter Y or n.');
   return askForConfirmation();
 }
 
 async function revertCommit({ newVersion, main } = {}) {
-  const version = newVersion || "x.x.x";
+  const version = newVersion || 'x.x.x';
   // TODO later revert this automatically.
-  console.log("🟠 Please revert the release commit and tag:");
+  console.log('🟠 Please revert the release commit and tag:');
   if (main) {
-    console.log("🚨 Be sure of your actions as you are in the main branch!");
+    console.log('🚨 Be sure of your actions as you are in the main branch!');
   }
   console.log("- Run 'git reset HEAD~1' to revert the last commit");
   console.log(`- Run 'git tag -d v${version}' to delete the tag locally`);
@@ -90,8 +74,8 @@ async function revertCommit({ newVersion, main } = {}) {
 }
 
 async function revertChanges() {
-  // TODO later revert this automatically. console.log("🟠 Please manually revert the changed files!");
-
+  // TODO later revert this automatically.
+  console.log('🟠 Please manually revert the changed files!');
   process.exit(1);
 }
 
@@ -106,7 +90,7 @@ async function runExec(cmd, { silent } = {}) {
     }
     return result;
   } catch (e) {
-    console.log("Error:", e.stderr);
+    console.log('Error:', e.stderr);
     throw Error(e.stderr);
   }
 }
