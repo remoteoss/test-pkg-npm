@@ -3,7 +3,21 @@ const readline = require("node:readline/promises");
 const { exec } = require("child-process-promise");
 
 async function checkGitStatus() {
-  const result = await runExec("git status --porcelain");
+  console.log("Checking your PR branch...");
+  const resultBranch = await runExec("git branch --show-current", {
+    silent: true,
+  });
+  const branchName = resultBranch.stdout.toString().trim();
+  if (branchName === "main") {
+    console.error(
+      `🟠 You are at "main". Are you sure you wanna release a dev version here?`
+    );
+    process.exit(1);
+  }
+
+  const result = await runExec("git status --porcelain", {
+    silent: true,
+  });
   const changes = result.stdout.toString().trim();
   if (!!changes) {
     console.error(
