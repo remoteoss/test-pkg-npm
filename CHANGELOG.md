@@ -1,3 +1,14 @@
+#### 0.1.7-beta.0 (2023-05-18)
+
+##### Chores
+
+*  revert package version to 0.1.6-beta.0 ([3362880f](https://github.com/remoteoss/test-pkg-npm/commit/3362880fd2b8d24e151f2f845ae9fcf36e10acb4))
+*  revert package version to v0.1.6-beta.0 ([0023307b](https://github.com/remoteoss/test-pkg-npm/commit/0023307bef6870385da02bd38ba151edbd19b8a4))
+
+##### Bug Fixes
+
+*  wave good night to a person ([7ae07551](https://github.com/remoteoss/test-pkg-npm/commit/7ae07551b6490a05e94ed37a16b2643f7872b759))
+
 #### 0.1.6-beta.0 (2023-05-17)
 
 ##### Bug Fixes
