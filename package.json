@@ -1,6 +1,6 @@
 {
   "name": "@remoteoss/test-pkg-npm",
-  "version": "v0.1.6-beta.0",
+  "version": "0.1.6-beta.0",
   "description": "Just testing Github actions. Do not use this",
   "main": "index.js",
   "scripts": {
