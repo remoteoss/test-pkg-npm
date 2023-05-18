@@ -5,3 +5,5 @@ console.log("Hello person!");
 console.log("Goodbye person!");
 
 console.log("Good night person!")
+
+console.log("Hello ancestors!");
